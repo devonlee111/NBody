@@ -1,21 +1,34 @@
-public class Main {
-	public static void main(String[] args) {
-			Quadrant q = new Quadrant(0.0, 0.0, 100.0);
-			Quadrant nw = q.NW();
-			Quadrant ne = q.NE();
-			Quadrant sw = q.SW();
-			Quadrant se = q.SE();
-			
-			Point p = nw.mid();
-			System.out.println("North-West | " + p.X() + " | " + p.Y() + " | " + nw.size());
-			
-			p = ne.mid();
-			System.out.println("North-East | " + p.X() + " | " + p.Y() + " | " + nw.size());
+import javax.swing.*;
+import java.awt.*;
+
+public class Main extends JFrame{
+	public Main() {
+		setSize(1000, 1000);
+		setLayout(new BorderLayout());
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		Space space = new Space();
+		space.setSize(800, 800);
+		
+		JPanel input = new JPanel();
+		input.setLayout(new FlowLayout());
+		JButton runBtn = new JButton("Run");
+		input.add(runBtn);
+		
+		add(input, BorderLayout.NORTH);
+		add(space, BorderLayout.CENTER);
+		setVisible(true);
+	}
 	
-			p = sw.mid();
-			System.out.println("South-West | " + p.X() + " | " + p.Y() + " | " + nw.size());
-				
-			p = se.mid();
-			System.out.println("South-East | " + p.X() + " | " + p.Y() + " | " + nw.size());
+	private class Space extends JPanel {
+		@Override
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			setBackground(Color.BLACK);
+		}
+	}
+	
+	public static void main(String[] args) {
+		Main simulation = new Main();
 	}
 }
