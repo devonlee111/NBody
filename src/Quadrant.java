@@ -21,6 +21,7 @@ public class Quadrant {
 		return false;
 	}
 	
+	// Return a point with (x, y) coordinates at the center of the quadrant
 	public Point mid() {
 		Point p = new Point(midY, midX);
 		return p;
