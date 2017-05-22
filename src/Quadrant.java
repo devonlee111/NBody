@@ -17,7 +17,10 @@ public class Quadrant {
 	}
 	
 	// Check if this quadrant contains the specified body
-	public boolean contains(Body body) {
+	public boolean contains(double x, double y) {
+		if (x <= midX + size / 2 && x >= midX - size / 2 && y <= midY + size / 2 && y >= midY - size / 2 ) {
+			return true;
+		}
 		return false;
 	}
 	
@@ -35,13 +38,13 @@ public class Quadrant {
 	
 	// Create Upper Left sub-quadrant
 	public Quadrant NW() {
-		Quadrant q = new Quadrant(midX + size/4, midY - size/4, size/2);
+		Quadrant q = new Quadrant(midX - size/4, midY + size/4, size/2);
 		return q;
 	}
 	
 	// Create Lower Right sub-quadrant
 	public Quadrant SE() {
-		Quadrant q = new Quadrant(midX - size/4, midY + size/4, size/2);
+		Quadrant q = new Quadrant(midX + size/4, midY - size/4, size/2);
 		return q;
 	}
 	
