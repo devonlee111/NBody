@@ -3,12 +3,14 @@ import java.awt.*;
 
 public class Main extends JFrame{
 	
-	public int numBodies;
-	public double kmPerPix;
-	public double radius;
-	public double systemMass = 1.989e30;
-	public Point origin = new Point(400, 400);
-	public Body[] bodies;
+	private int numBodies;
+	private double kmPerPix;
+	private double radius;
+	private double maxBodyMass = 1.898e27; 
+	private double solarMass = 1.989e30;
+	private double systemMass = 0;
+	private Point origin = new Point(400, 400);
+	private Body[] bodies;
 	private Quadrant all;
 	
 	public Main(int numBodies, double radius) {
@@ -16,7 +18,7 @@ public class Main extends JFrame{
 		this.radius = radius;
 		bodies = new Body[numBodies];
 		kmPerPix = radius / 400;
-		all = new Quadrant(0, 0, radius * 2);
+		all = new Quadrant(0, 0, radius * 4);
 		
 		generateBodies();
 		
@@ -56,6 +58,7 @@ public class Main extends JFrame{
 	
 	// Create a new QuadTree with all the bodies, calculate the forces the tree enacts upon every body, and update the positions of each body.
 	public void calculateForces() {
+		//System.out.println(bodies[1].distanceTo(bodies[0]));
 		QuadTree tree = new QuadTree(all);
 		for (int i = 0; i < numBodies; i++) {
 			if (bodies[i].inQuad(all)) {
@@ -65,7 +68,7 @@ public class Main extends JFrame{
 		for (int i = 0; i < numBodies; i++) {
 			 bodies[i].removeForces();
 			 if (bodies[i].inQuad(all)) {
-				 tree.updateForces(bodies[i], 2);
+				 tree.updateForces(bodies[i], 1);
 			 }
 		}
 		for (int i = 0; i < numBodies; i++) {
@@ -75,14 +78,26 @@ public class Main extends JFrame{
 	
 	// Randomly generate the required number of bodies uniformly in a circle.
 	public void generateBodies() {
-		for (int i = 0; i < numBodies; i++) {
+		for (int i = 1; i < numBodies; i++) {
+			double mass = Math.random() * maxBodyMass + 1;
+			systemMass += mass;
 			double dist = Math.sqrt(Math.random()) * radius + 1;
+			//dist = radius;
 			double theta = Math.random() * 360;
+			double thetaV = (theta + 90) % 360;
+			//System.out.println(theta + " | " + thetaV);
+			theta *= (Math.PI / 180);
+			thetaV *= (Math.PI / 180);
 			double x = (dist * Math.cos(theta));
-			double y = (dist * Math.sin(theta));
-			Body b = new Body(x, y, 0, 0, systemMass / numBodies);
+			double y = -(dist * Math.sin(theta)); 	
+			double vel = Math.sqrt((6.67408e-11 * (solarMass + mass)) / dist);
+			double xVel = (vel * Math.cos(thetaV));
+			double yVel = -(vel * Math.sin(thetaV));
+			//System.out.println(theta + " | " + thetaV + ": " + xVel + ", " + yVel);
+			Body b = new Body(x, y, xVel, yVel, mass, false);
 			bodies[i] = b;
 		}
+		bodies[0] = new Body (0, 0, 0, 0, solarMass, true);
 	}
 	
 	public static void main(String[] args) {

@@ -8,21 +8,25 @@ public class Body {
 	private double xForce;
 	private double yForce;
 	public double mass;
+	private boolean stationary;
 	
-	public Body(double x, double y, double xVel, double yVel, double mass) {
+	public Body(double x, double y, double xVel, double yVel, double mass, boolean stationary) {
 		this.x = x;
 		this.y = y;
 		this.xVel = xVel;
 		this.yVel = yVel;
 		this.mass = mass;
+		this.stationary = stationary;
 	}
 	
 	// Update the body's position and velocity with the given timestep.
 	public void update(double timestep) {
-		xVel += timestep * (xForce / mass);
-		yVel += timestep * (yForce / mass);
-		x += timestep * xVel;
-		y += timestep * yVel;
+		if (!stationary) {
+			xVel += timestep * (xForce / mass);
+			yVel += timestep * (yForce / mass);
+			x += timestep * xVel;
+			y += timestep * yVel;
+		}
 	}
 	
 	// Calculate the distance from this body to another.
@@ -30,6 +34,14 @@ public class Body {
 		double xDist = b.x - x;
 		double yDist = b.y - y;
 		return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+	}
+	
+	public void setXVel(double xVel) {
+		this.xVel = xVel;
+	}
+	
+	public void setYVel(double yVel) {	
+		this.yVel = yVel;
 	}
 	
 	// Set the forces acting upon the body to 0.
@@ -59,7 +71,7 @@ public class Body {
 		double newX = (float)(((a.mass * a.x) + (b.mass * b.x))/(a.mass + b.mass));
 		double newY = (float)(((a.mass * a.y) + (b.mass * b.y))/(a.mass + b.mass));
 		double newMass = a.mass + b.mass;
-		return new Body(newX, newY, 0, 0, newMass);
+		return new Body(newX, newY, 0, 0, newMass, false);
 	}
 	
 	// Return a point with the body's current positition
