@@ -1,3 +1,5 @@
 # NBody Simulation
 This is my first attempt at creating a functional N-Body Simulation.
 This simulation is implemented the Barnes-Hut algorithm to perform my simulation in order to achieve a runtime complexity of O(n logn).
+
+My version of the N-Body simulation is in no way an amazing implementation. There are tons of other versions of N-Body simulations out there that do a much better job at simulating the physics in the simulation as well as having much better UIs than mine. I did the best I could with basic research and my limited understanding of the physics of gravity and calculating stable orbits and what resulted was something that probably has some errors. However, the physics and simulation was not the main goal of this project. The main goal was one of personal growth. My aim was to achieve a greater understanding of how the Barnes-Hut algorithm worked and how using the quad-tree data structure yielded a runtime of O(nlogn) as opposed to the runtime if O(n^2) of a brute force algorithm.
