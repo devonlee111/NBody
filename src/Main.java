@@ -6,8 +6,11 @@ public class Main extends JFrame{
 	private int numBodies;
 	private double kmPerPix;
 	private double radius;
-	private double maxBodyMass = 1.898e27; 
+	private double maxBodyMass = 5.972e24;
+	private double maxBodyDensity = 5.514;
+	private double minBodyDensity = .687;
 	private double solarMass = 1.989e30;
+	private double solarDensity = 1.408;
 	private Body[] bodies;
 	private Quadrant all;
 	
@@ -15,12 +18,12 @@ public class Main extends JFrame{
 		this.numBodies = numBodies;
 		this.radius = radius;
 		bodies = new Body[numBodies];
-		kmPerPix = radius / 400;
+		kmPerPix = 100000;//radius / 100;
 		all = new Quadrant(0, 0, radius * 4);
 		
 		generateBodies();
 		
-		setSize(900, 900);
+		setSize(1800, 900);
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
@@ -40,7 +43,11 @@ public class Main extends JFrame{
 			for (int i = 0; i < numBodies; i++) {
 				Body b = bodies[i];
 				// Draw a dot on the corresponding position on the screen.
-				g.fillOval((int)(b.x / kmPerPix) + 425, (int)(b.y / kmPerPix) + 425, 2, 2);
+				int radius = (int)((b.radius/1000) / kmPerPix);
+				if (radius < 1) {
+					radius = 1;
+				}
+				g.fillOval((int)((b.x / kmPerPix) - radius + 800), (int)((b.y / kmPerPix) - radius + 500), radius * 2, radius * 2);
 			}
 			// Update every body each time it is repainted.
 			calculateForces();
@@ -71,20 +78,21 @@ public class Main extends JFrame{
 	public void generateBodies() {
 		for (int i = 0; i < numBodies; i++) {
 			double mass = Math.random() * maxBodyMass + 1;
+			double density = (Math.random() * (maxBodyDensity - minBodyDensity)) + minBodyDensity;
 			double dist = Math.sqrt(Math.random()) * radius + 1;
 			double theta = Math.random() * 360;
 			double thetaV = (theta + 90) % 360;
 			theta *= (Math.PI / 180);
 			thetaV *= (Math.PI / 180);
 			double x = (dist * Math.cos(theta));
-			double y = -(dist * Math.sin(theta)); 	
-			double vel = Math.sqrt((6.67408e-11 * (solarMass + mass)) / dist);
+			double y = -(dist * Math.sin(theta));
+			double vel = Math.sqrt((6.67408e-11 * (solarMass + mass)) / (dist));
 			double xVel = (vel * Math.cos(thetaV));
 			double yVel = -(vel * Math.sin(thetaV));
-			Body b = new Body(x, y, xVel, yVel, mass, false);
+			Body b = new Body(x, y, xVel, yVel, mass, density, false);
 			bodies[i] = b;
 		}
-		bodies[0] = new Body (0, 0, 0, 0, solarMass, true);
+		bodies[0] = new Body (0, 0, 0, 0, solarMass, solarDensity, true);
 	}
 	
 	public static void main(String[] args) {

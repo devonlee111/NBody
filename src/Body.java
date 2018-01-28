@@ -8,14 +8,18 @@ public class Body {
 	private double xForce;
 	private double yForce;
 	public double mass;
+	public double density;
+	public double radius;
 	private boolean stationary;
 	
-	public Body(double x, double y, double xVel, double yVel, double mass, boolean stationary) {
+	public Body(double x, double y, double xVel, double yVel, double mass, double density, boolean stationary) {
 		this.x = x;
 		this.y = y;
 		this.xVel = xVel;
 		this.yVel = yVel;
 		this.mass = mass;
+		this.density = density;
+		this.radius = Math.cbrt((mass / density) / ((4/3) * Math.PI));
 		this.stationary = stationary;
 	}
 	
@@ -67,12 +71,20 @@ public class Body {
 	
 	// Combine this body with another body
 	// Store the center of mass in this body and update the mass
-	public Body combine(Body a, Body b) {
-		double newX = (float)(((a.mass * a.x) + (b.mass * b.x))/(a.mass + b.mass));
-		double newY = (float)(((a.mass * a.y) + (b.mass * b.y))/(a.mass + b.mass));
-		double newMass = a.mass + b.mass;
-		return new Body(newX, newY, 0, 0, newMass, false);
+	public Body combine(Body b) {
+		double newX = (float)(((this.mass * this.x) + (b.mass * b.x))/(this.mass + b.mass));
+		double newY = (float)(((this.mass * this.y) + (b.mass * b.y))/(this.mass + b.mass));
+		double newMass = this.mass + b.mass;
+		return new Body(newX, newY, 0, 0, newMass, 0, false);
 	}
+	
+	// Collide this body with another body in an inelastic collision
+	/*public Body collide(Body b) {
+		double newX = (float)(((this.mass * this.x) + (b.mass * b.x))/(this.mass + b.mass));
+		double newY = (float)(((this.mass * this.y) + (b.mass * b.y))/(this.mass + b.mass));
+		double newMass = this.mass + b.mass;
+		
+	}*/
 	
 	// Return a point with the body's current positition
 	public Point pos() {

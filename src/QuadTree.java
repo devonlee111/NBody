@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class QuadTree {
 
 	private Body body;
@@ -23,7 +25,7 @@ public class QuadTree {
 		// If the body is an internal node, then combine the two bodies and update sub-quadrants
 		// Create the correct sub-quadrant if the correct sub-quadrant does not exist.
 		else if (!isExternalNode()) {
-			this.body = this.body.combine(this.body, body);
+			this.body = this.body.combine(body);
 			Quadrant northeast = q.NE();
 			if (body.inQuad(northeast)) {
 				if (NE == null) {
@@ -120,11 +122,17 @@ public class QuadTree {
 	}
 	
 	// Given a body calculate the forces that all other bodies in the tree enact upon it.
-	public void updateForces(Body b, double theta) {
-		// Calculate the force one of the bodies in the tree enacts on the given body directly if you reach an external node.
+	public ArrayList<Body> updateForces(Body b, double theta) {
+		ArrayList<Body> combinedBodies = new ArrayList<Body>(); 
+		// Calculate the force one of the bodies in the tree enacts on the given body directly if you reaombinech an external node.
 		if (isExternalNode()) {
 			if (body != b) {
 				b.addForce(body);
+				double dist = Math.sqrt(Math.pow((body.x - b.x), 2) + Math.pow((body.y - b.y), 2));
+				if ((body.radius + b.radius) <= dist) {
+					combinedBodies.add(body);
+					combinedBodies.add(b);
+				}
 			}
 		}
 		// If the internal node is sufficiently far away from the given body approximate the forces on the other body using the center of mass.
@@ -146,5 +154,6 @@ public class QuadTree {
 				SW.updateForces(b, theta);
 			}			
 		}
+		return combinedBodies;
 	}
 }
