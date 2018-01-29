@@ -4,10 +4,10 @@ public class QuadTree {
 
 	private Body body;
 	private Quadrant q;
-	private QuadTree NE;
-	private QuadTree NW;
-	private QuadTree SE;
-	private QuadTree SW;
+	private QuadTree NE = null;
+	private QuadTree NW = null;
+	private QuadTree SE = null;
+	private QuadTree SW = null;
 	
 	public QuadTree(Quadrant q) {
 		this.q = q;
@@ -124,15 +124,16 @@ public class QuadTree {
 	// Given a body calculate the forces that all other bodies in the tree enact upon it.
 	public ArrayList<Body> updateForces(Body b, double theta) {
 		ArrayList<Body> combinedBodies = new ArrayList<Body>(); 
-		// Calculate the force one of the bodies in the tree enacts on the given body directly if you reaombinech an external node.
-		if (isExternalNode()) {
+		// Calculate the force one of the bodies in the tree enacts on the given body directly inside an external node.
+		if (this.isExternalNode()) {
 			if (body != b) {
 				b.addForce(body);
 				double dist = Math.sqrt(Math.pow((body.x - b.x), 2) + Math.pow((body.y - b.y), 2));
-				if ((body.radius + b.radius) <= dist) {
+				if ( 50 * ((body.radius / 1000) + (b.radius / 1000)) >= dist) {
 					combinedBodies.add(body);
 					combinedBodies.add(b);
 				}
+				return combinedBodies;
 			}
 		}
 		// If the internal node is sufficiently far away from the given body approximate the forces on the other body using the center of mass.
@@ -142,16 +143,16 @@ public class QuadTree {
 		// Recursively calculate the forces the bodies in each sub-quadrant enacts upon the given body.
 		else {
 			if (NE != null) {
-				NE.updateForces(b, theta);
+				combinedBodies.addAll(NE.updateForces(b, theta));
 			}
 			if (NW != null) {
-				NW.updateForces(b, theta);
+				combinedBodies.addAll(NW.updateForces(b, theta));
 			}
 			if (SE != null) {
-				SE.updateForces(b, theta);
+				combinedBodies.addAll(SE.updateForces(b, theta));
 			}
 			if (SW != null) {
-				SW.updateForces(b, theta);
+				combinedBodies.addAll(SW.updateForces(b, theta));
 			}			
 		}
 		return combinedBodies;

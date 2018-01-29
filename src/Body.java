@@ -19,7 +19,12 @@ public class Body {
 		this.yVel = yVel;
 		this.mass = mass;
 		this.density = density;
-		this.radius = Math.cbrt((mass / density) / ((4/3) * Math.PI));
+		// Volume in meters cubed
+		double volume = (this.mass/this.density) / 1000;
+		// Radius in meters
+		this.radius = Math.cbrt(3 * (volume / (4 * Math.PI)));
+		// Radius in km
+		this.radius /= 1000;
 		this.stationary = stationary;
 	}
 	
@@ -85,8 +90,13 @@ public class Body {
 		double newMass = this.mass + b.mass;
 		double newXVel = ((this.mass * this.x) + (b.mass * b.x)) / (this.mass + b.mass);
 		double newYVel = ((this.mass * this.y) + (b.mass + b.y)) / (this.mass + b.mass);
-		double thisVolume = (4/3) * Math.PI * Math.pow(this.radius, 3);
-		double bVolume = (4/3) * Math.PI * Math.pow(b.radius, 3);
+		
+		// Volume in meters cubed
+		double thisVolume = (this.mass/this.density) / 1000;
+		
+		// Volume in meters cubed
+		double bVolume = (b.mass/b.density) / 1000;
+		
 		double newDensity = ((this.density * thisVolume) + (b.density * bVolume)) / (thisVolume + bVolume);
 		boolean fixed = false;
 		if (this.stationary || b.stationary) {
@@ -103,7 +113,7 @@ public class Body {
 		return new Body(newX, newY, newXVel, newYVel, newMass, newDensity, fixed);
 	}
 	
-	// Return a point with the body's current positition
+	// Return a point with the body's current position
 	public Point pos() {
 		Point p = new Point(x, y);
 		return p;

@@ -7,7 +7,7 @@ public class Main extends JFrame{
 	private int numBodies;
 	private double kmPerPix;
 	private double radius;
-	private double maxBodyMass = 5.972e28;
+	private double maxBodyMass = 5.972e26;
 	private double maxBodyDensity = 5.514;
 	private double minBodyDensity = .687;
 	private double solarMass = 1.989e30;
@@ -19,7 +19,7 @@ public class Main extends JFrame{
 		this.numBodies = numBodies;
 		this.radius = radius;
 		bodies = new ArrayList<Body>();
-		kmPerPix = 100000;//radius / 100;
+		kmPerPix = 10000000;
 		all = new Quadrant(0, 0, radius * 4);
 		
 		generateBodies();
@@ -44,7 +44,7 @@ public class Main extends JFrame{
 			for (int i = 0; i < numBodies; i++) {
 				Body b = bodies.get(i);
 				// Draw a dot on the corresponding position on the screen.
-				int radius = (int)((b.radius/1000) / kmPerPix);
+				int radius = (int)((b.radius) / kmPerPix);
 				if (radius < 1) {
 					radius = 1;
 				}
@@ -59,7 +59,7 @@ public class Main extends JFrame{
 	// Create a new QuadTree with all the bodies, calculate the forces the tree enacts upon every body, and update the positions of each body.
 	public void calculateForces() {
 		QuadTree tree = new QuadTree(all);
-		ArrayList<Body> combined = null;
+		ArrayList<Body> combined = new ArrayList<Body>();
 		for (int i = 0; i < numBodies; i++) {
 			if (bodies.get(i).inQuad(all)) {
 				tree.insert(bodies.get(i));
@@ -73,21 +73,21 @@ public class Main extends JFrame{
 		}
 		if (!combined.isEmpty()) {
 			for (int i = 0; i < combined.size(); i += 2) {
-				Body combinedBody = combined.get(i).combine(combined.get(i + 1));
+				Body combinedBody = combined.get(i).collide(combined.get(i + 1));
 				bodies.remove(combined.get(i));
 				bodies.remove(combined.get(i + 1));
 				bodies.add(combinedBody);
-				System.out.println("collision");
+				numBodies -= 1;
 			}
 		}
 		for (int i = 0; i < numBodies; i++) {
-			bodies.get(i).update(1);
+			bodies.get(i).update(10);
 		}
 	}
 	
 	// Randomly generate the required number of bodies uniformly in a circle.
 	public void generateBodies() {
-		for (int i = 0; i < numBodies; i++) {
+		for (int i = 0; i < numBodies - 1; i++) {
 			double mass = Math.random() * maxBodyMass + 1;
 			double density = (Math.random() * (maxBodyDensity - minBodyDensity)) + minBodyDensity;
 			double dist = Math.sqrt(Math.random()) * radius + 1;
@@ -103,10 +103,12 @@ public class Main extends JFrame{
 			Body b = new Body(x, y, xVel, yVel, mass, density, false);
 			bodies.add(b);
 		}
-		bodies.add(0, new Body (0, 0, 0, 0, solarMass, solarDensity, true));
+		Body sun = new Body (0, 0, 0, 0, solarMass, solarDensity, true);
+		System.out.println(sun.radius);
+		bodies.add(0, sun);
 	}
 	
 	public static void main(String[] args) {
-		Main sim = new Main(10000, 4.545e9);
+		Main sim = new Main(1000, 4.545e9);
 	}
 }
