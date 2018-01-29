@@ -10,7 +10,7 @@ public class Body {
 	public double mass;
 	public double density;
 	public double radius;
-	private boolean stationary;
+	public boolean stationary;
 	
 	public Body(double x, double y, double xVel, double yVel, double mass, double density, boolean stationary) {
 		this.x = x;
@@ -79,12 +79,29 @@ public class Body {
 	}
 	
 	// Collide this body with another body in an inelastic collision
-	/*public Body collide(Body b) {
+	public Body collide(Body b) {
 		double newX = (float)(((this.mass * this.x) + (b.mass * b.x))/(this.mass + b.mass));
 		double newY = (float)(((this.mass * this.y) + (b.mass * b.y))/(this.mass + b.mass));
 		double newMass = this.mass + b.mass;
-		
-	}*/
+		double newXVel = ((this.mass * this.x) + (b.mass * b.x)) / (this.mass + b.mass);
+		double newYVel = ((this.mass * this.y) + (b.mass + b.y)) / (this.mass + b.mass);
+		double thisVolume = (4/3) * Math.PI * Math.pow(this.radius, 3);
+		double bVolume = (4/3) * Math.PI * Math.pow(b.radius, 3);
+		double newDensity = ((this.density * thisVolume) + (b.density * bVolume)) / (thisVolume + bVolume);
+		boolean fixed = false;
+		if (this.stationary || b.stationary) {
+			fixed = true;
+			if (this.stationary) {
+				newX = this.x;
+				newY = this.y;
+			}
+			else {
+				newX = b.x;
+				newY = b.y;
+			}
+		}
+		return new Body(newX, newY, newXVel, newYVel, newMass, newDensity, fixed);
+	}
 	
 	// Return a point with the body's current positition
 	public Point pos() {

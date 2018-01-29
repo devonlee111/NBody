@@ -1,30 +1,26 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class Main extends JFrame{
 	
 	private int numBodies;
 	private double kmPerPix;
 	private double radius;
-	private double maxBodyMass = 5.972e28;
-	private double maxBodyDensity = 5.514;
-	private double minBodyDensity = .687;
+	private double maxBodyMass = 1.898e27; 
 	private double solarMass = 1.989e30;
-	private double solarDensity = 1.408;
-	private ArrayList<Body> bodies;
+	private Body[] bodies;
 	private Quadrant all;
 	
 	public Main(int numBodies, double radius) {
 		this.numBodies = numBodies;
 		this.radius = radius;
-		bodies = new ArrayList<Body>();
-		kmPerPix = 100000;//radius / 100;
+		bodies = new Body[numBodies];
+		kmPerPix = radius / 400;
 		all = new Quadrant(0, 0, radius * 4);
 		
 		generateBodies();
 		
-		setSize(1800, 900);
+		setSize(900, 900);
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
@@ -42,13 +38,9 @@ public class Main extends JFrame{
 			setBackground(Color.BLACK);
 			g.setColor(Color.WHITE);
 			for (int i = 0; i < numBodies; i++) {
-				Body b = bodies.get(i);
+				Body b = bodies[i];
 				// Draw a dot on the corresponding position on the screen.
-				int radius = (int)((b.radius/1000) / kmPerPix);
-				if (radius < 1) {
-					radius = 1;
-				}
-				g.fillOval((int)((b.x / kmPerPix) - radius + 800), (int)((b.y / kmPerPix) - radius + 500), radius * 2, radius * 2);
+				g.fillOval((int)(b.x / kmPerPix) + 425, (int)(b.y / kmPerPix) + 425, 2, 2);
 			}
 			// Update every body each time it is repainted.
 			calculateForces();
@@ -59,29 +51,19 @@ public class Main extends JFrame{
 	// Create a new QuadTree with all the bodies, calculate the forces the tree enacts upon every body, and update the positions of each body.
 	public void calculateForces() {
 		QuadTree tree = new QuadTree(all);
-		ArrayList<Body> combined = null;
 		for (int i = 0; i < numBodies; i++) {
-			if (bodies.get(i).inQuad(all)) {
-				tree.insert(bodies.get(i));
+			if (bodies[i].inQuad(all)) {
+				tree.insert(bodies[i]);
 			}
 		}
 		for (int i = 0; i < numBodies; i++) {
-			 bodies.get(i).removeForces();
-			 if (bodies.get(i).inQuad(all)) {
-				 combined = tree.updateForces(bodies.get(i), 1);
+			 bodies[i].removeForces();
+			 if (bodies[i].inQuad(all)) {
+				 tree.updateForces(bodies[i], 1);
 			 }
 		}
-		if (!combined.isEmpty()) {
-			for (int i = 0; i < combined.size(); i += 2) {
-				Body combinedBody = combined.get(i).combine(combined.get(i + 1));
-				bodies.remove(combined.get(i));
-				bodies.remove(combined.get(i + 1));
-				bodies.add(combinedBody);
-				System.out.println("collision");
-			}
-		}
 		for (int i = 0; i < numBodies; i++) {
-			bodies.get(i).update(1);
+			bodies[i].update(10);
 		}
 	}
 	
@@ -89,21 +71,20 @@ public class Main extends JFrame{
 	public void generateBodies() {
 		for (int i = 0; i < numBodies; i++) {
 			double mass = Math.random() * maxBodyMass + 1;
-			double density = (Math.random() * (maxBodyDensity - minBodyDensity)) + minBodyDensity;
 			double dist = Math.sqrt(Math.random()) * radius + 1;
 			double theta = Math.random() * 360;
 			double thetaV = (theta + 90) % 360;
 			theta *= (Math.PI / 180);
 			thetaV *= (Math.PI / 180);
 			double x = (dist * Math.cos(theta));
-			double y = -(dist * Math.sin(theta));
-			double vel = Math.sqrt((6.67408e-11 * (solarMass + mass)) / (dist));
+			double y = -(dist * Math.sin(theta)); 	
+			double vel = Math.sqrt((6.67408e-11 * (solarMass + mass)) / dist);
 			double xVel = (vel * Math.cos(thetaV));
 			double yVel = -(vel * Math.sin(thetaV));
-			Body b = new Body(x, y, xVel, yVel, mass, density, false);
-			bodies.add(b);
+			Body b = new Body(x, y, xVel, yVel, mass, false);
+			bodies[i] = b;
 		}
-		bodies.add(0, new Body (0, 0, 0, 0, solarMass, solarDensity, true));
+		bodies[0] = new Body (0, 0, 0, 0, solarMass, true);
 	}
 	
 	public static void main(String[] args) {
