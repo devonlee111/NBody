@@ -7,13 +7,18 @@ public class Main extends JFrame{
 	private int numBodies;
 	private double kmPerPix;
 	private double radius;
-	private double maxBodyMass = 5.972e26;
+	private double maxBodyMass = 5.972e24;
 	private double maxBodyDensity = 5.514;
 	private double minBodyDensity = .687;
 	private double solarMass = 1.989e30;
 	private double solarDensity = 1.408;
 	private ArrayList<Body> bodies;
+	ArrayList<Quadrant> quadrants = new ArrayList<Quadrant>();
 	private Quadrant all;
+	private boolean debug = false;
+	private boolean showQuadrants = true;
+	private int midX = 900;
+	private int midY = 500;
 	
 	public Main(int numBodies, double radius) {
 		this.numBodies = numBodies;
@@ -30,8 +35,28 @@ public class Main extends JFrame{
 		
 		Space space = new Space();
 		add(space, BorderLayout.CENTER);
-		
 		setVisible(true);
+		
+		long startTime = System.nanoTime();
+		long elapsedTime = startTime;
+		int frames = 0;
+		int totalFrames = 0;
+		int numSeconds = 0;
+		while(true) {
+			if (debug) {
+				elapsedTime = System.nanoTime();
+				if ((elapsedTime - startTime) >= 1e9) {
+					startTime = System.nanoTime();
+					System.out.println("current fps:\t" + frames);
+					totalFrames += frames;
+					numSeconds++;
+					System.out.println("avg fps:\t" + totalFrames / numSeconds);
+					frames = 0;
+				}
+			}
+			space.display();
+			frames++;
+		}
 	}
 	
 	// A JPanel that is used to represent and display the space in which the bodies reside
@@ -48,11 +73,27 @@ public class Main extends JFrame{
 				if (radius < 1) {
 					radius = 1;
 				}
-				g.fillOval((int)((b.x / kmPerPix) - radius + 800), (int)((b.y / kmPerPix) - radius + 500), radius * 2, radius * 2);
+				g.fillOval((int)((b.x / kmPerPix) - radius + midX), (int)((b.y / kmPerPix) - radius + midY), radius * 2, radius * 2);
 			}
+			if (showQuadrants) {
+				g.setColor(Color.GREEN);
+				for (int i = 0; i < quadrants.size(); i++) {
+					Quadrant quad = quadrants.get(i);
+					g.drawLine((int)((quad.midX + (quad.size()/2)) / kmPerPix) + midX, (int)(quad.midY / kmPerPix) + midY, (int)((quad.midX - (quad.size()/2)) / kmPerPix) + midX, (int)(quad.midY / kmPerPix) + midY);
+					g.drawLine((int)(quad.midX / kmPerPix) + midX, (int)((quad.midY + (quad.size()/2)) / kmPerPix) + midY, (int)(quad.midX / kmPerPix) + midX, (int)((quad.midY - (quad.size()/2)) / kmPerPix) + midY);
+				}
+			}
+		}
+		
+		public void display() {
 			// Update every body each time it is repainted.
 			calculateForces();
-			repaint();
+			if (numBodies < 5000) {
+				paintImmediately(0, 0, 1800, 900);
+			}
+			else {
+				repaint();
+			}
 		}
 	}
 	
@@ -60,9 +101,10 @@ public class Main extends JFrame{
 	public void calculateForces() {
 		QuadTree tree = new QuadTree(all);
 		ArrayList<Body> combined = new ArrayList<Body>();
+		quadrants.clear();
 		for (int i = 0; i < numBodies; i++) {
 			if (bodies.get(i).inQuad(all)) {
-				tree.insert(bodies.get(i));
+				quadrants.addAll(tree.insert(bodies.get(i)));
 			}
 		}
 		for (int i = 0; i < numBodies; i++) {
@@ -78,6 +120,7 @@ public class Main extends JFrame{
 				bodies.remove(combined.get(i + 1));
 				bodies.add(combinedBody);
 				numBodies -= 1;
+				System.out.println("collision");
 			}
 		}
 		for (int i = 0; i < numBodies; i++) {
@@ -92,6 +135,7 @@ public class Main extends JFrame{
 			double density = (Math.random() * (maxBodyDensity - minBodyDensity)) + minBodyDensity;
 			double dist = Math.sqrt(Math.random()) * radius + 1;
 			double theta = Math.random() * 360;
+			//theta = 90;
 			double thetaV = (theta + 90) % 360;
 			theta *= (Math.PI / 180);
 			thetaV *= (Math.PI / 180);
@@ -109,6 +153,6 @@ public class Main extends JFrame{
 	}
 	
 	public static void main(String[] args) {
-		Main sim = new Main(1000, 4.545e9);
+		Main sim = new Main(4999, 4.545e9);
 	}
 }

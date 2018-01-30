@@ -1,8 +1,8 @@
 public class Quadrant {
 	
-	private double midX;
-	private double midY;
-	private double size;
+	public double midX;
+	public double midY;
+	public double size;
 	
 	// Create new quadrant with side length size and midpoint (midX, midY)
 	public Quadrant(double midX, double midY, double size) {

@@ -14,7 +14,8 @@ public class QuadTree {
 	}
 
 	// Insert a new body into the tree and update all internal bodies.
-	public void insert(Body body) {
+	public ArrayList<Quadrant> insert(Body body) {
+		ArrayList<Quadrant> quadrants = new ArrayList<Quadrant>();
 		// Check if the current node is external and contains a body. 
 		// Add the body if it doesn't.
 		if (this.body == null) {
@@ -31,7 +32,7 @@ public class QuadTree {
 				if (NE == null) {
 					NE = new QuadTree(northeast);
 				}
-				NE.insert(body);
+				quadrants.addAll(NE.insert(body));
 			}
 			else {
 				Quadrant northwest = q.NW();
@@ -39,7 +40,7 @@ public class QuadTree {
 					if (NW == null) {
 						NW = new QuadTree(northwest);
 					}
-					NW.insert(body);
+					quadrants.addAll(NW.insert(body));
 				}
 				else {
 					Quadrant southeast = q.SE();
@@ -47,7 +48,7 @@ public class QuadTree {
 						if (SE == null) {
 							SE = new QuadTree(southeast);
 						}
-						SE.insert(body);
+						quadrants.addAll(SE.insert(body));
 					}
 					else {
 						Quadrant southwest = q.SW();
@@ -55,7 +56,7 @@ public class QuadTree {
 							if (SW == null) {
 								SW = new QuadTree(southwest);
 							}
-							SW.insert(body);
+							quadrants.addAll(SW.insert(body));
 						}
 					}
 				}
@@ -64,12 +65,13 @@ public class QuadTree {
 		// If the node is an external node, then put the current body in the correct sub-quadrant and insert the new body into this quadrant.
 		// Create the correct sub-quadrant if the correct sub-quadrant does not exist.
 		else {
+			quadrants.add(q);
 			Quadrant northeast = q.NE();
 			if (this.body.inQuad(northeast)) {
 				if (NE == null) {
 					NE = new QuadTree(q.NE());
 				}
-				NE.insert(this.body);
+				quadrants.addAll(NE.insert(this.body));
 			}
 			else {
 				Quadrant northwest = q.NW();
@@ -77,7 +79,7 @@ public class QuadTree {
 					if (NW == null) {
 						NW = new QuadTree(q.NW());
 					}
-					NW.insert(this.body);
+					quadrants.addAll(NW.insert(this.body));
 				}
 				else {
 					Quadrant southeast = q.SE();
@@ -85,7 +87,7 @@ public class QuadTree {
 						if (SE == null) {
 							SE = new QuadTree(q.SE());
 						}
-						SE.insert(this.body);
+						quadrants.addAll(SE.insert(this.body));
 					}
 					else {
 						Quadrant southwest = q.SW();
@@ -93,7 +95,7 @@ public class QuadTree {
 							if (SW == null) {
 								SW = new QuadTree(q.SW());
 							}
-							SW.insert(this.body);
+							quadrants.addAll(SW.insert(this.body));
 						}
 						else {
 							System.out.println("failed to insert into sub-quadrant");
@@ -101,8 +103,9 @@ public class QuadTree {
 					}
 				}
 			}
-			insert(body);
+			quadrants.addAll(insert(body));
 		}
+		return quadrants;
 	}
 	
 	// Check if this node is an external node.
