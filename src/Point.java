@@ -13,4 +13,8 @@ public class Point {
 		this.y = y;
 		this.z = z;
 	}
+	
+	public double distTo(Point p) {
+		return Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2) + Math.pow(z - p.z, 2));
+	}
 }

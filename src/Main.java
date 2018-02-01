@@ -1,8 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 
-public class Main extends JFrame{
+public class Main extends JFrame implements KeyListener, MouseListener {
 	
 	private int numBodies;
 	private double kmPerPix;
@@ -15,8 +16,9 @@ public class Main extends JFrame{
 	private ArrayList<Body> bodies;
 	ArrayList<Quadrant> quadrants = new ArrayList<Quadrant>();
 	private Quadrant all;
-	private boolean debug = false;
-	private boolean showQuadrants = true;
+	private boolean debug = true;
+	private boolean showQuadrants = false;
+	private boolean showTrails = true;
 	private int midX = 900;
 	private int midY = 500;
 	
@@ -35,6 +37,8 @@ public class Main extends JFrame{
 		
 		Space space = new Space();
 		add(space, BorderLayout.CENTER);
+		setFocusable(true);
+		requestFocus();
 		setVisible(true);
 		
 		long startTime = System.nanoTime();
@@ -61,7 +65,7 @@ public class Main extends JFrame{
 	
 	// A JPanel that is used to represent and display the space in which the bodies reside
 	private class Space extends JPanel {
-		@Override
+		@Override	
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			setBackground(Color.BLACK);
@@ -73,7 +77,17 @@ public class Main extends JFrame{
 				if (radius < 1) {
 					radius = 1;
 				}
+				if (showTrails) {
+					g.setColor(b.getColor());
+					ArrayList<Point> prevPos = b.getPrevPos();
+					for (int j = 0; j < prevPos.size(); j++) {
+						Point pos = prevPos.get(j);
+						g.fillOval((int)((pos.x / kmPerPix) - radius + midX), (int)((pos.y / kmPerPix) - radius + midY), radius * 2, radius * 2);
+					}
+				}
+				g.setColor(Color.WHITE);
 				g.fillOval((int)((b.x / kmPerPix) - radius + midX), (int)((b.y / kmPerPix) - radius + midY), radius * 2, radius * 2);
+
 			}
 			if (showQuadrants) {
 				g.setColor(Color.GREEN);
@@ -84,19 +98,21 @@ public class Main extends JFrame{
 				}
 			}
 		}
-		
+
 		public void display() {
 			// Update every body each time it is repainted.
 			calculateForces();
-			if (numBodies < 5000) {
+			if (numBodies < 4000) {
 				paintImmediately(0, 0, 1800, 900);
 			}
 			else {
 				repaint();
 			}
 		}
-	}
+
 	
+	}
+
 	// Create a new QuadTree with all the bodies, calculate the forces the tree enacts upon every body, and update the positions of each body.
 	public void calculateForces() {
 		QuadTree tree = new QuadTree(all);
@@ -135,7 +151,7 @@ public class Main extends JFrame{
 			double density = (Math.random() * (maxBodyDensity - minBodyDensity)) + minBodyDensity;
 			double dist = Math.sqrt(Math.random()) * radius + 1;
 			double theta = Math.random() * 360;
-			//theta = 90;
+			theta = 90;
 			double thetaV = (theta + 90) % 360;
 			theta *= (Math.PI / 180);
 			thetaV *= (Math.PI / 180);
@@ -151,8 +167,60 @@ public class Main extends JFrame{
 		System.out.println(sun.radius);
 		bodies.add(0, sun);
 	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		System.out.println("focus");
+		e.getComponent().requestFocus();
+	}
 	
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		System.out.println("focus");
+		e.getComponent().requestFocus();
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		e.getComponent().requestFocus();
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		
+	}
+	
+	@Override
+	public void keyTyped(KeyEvent e) {
+		
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		int keyCode = e.getKeyCode();
+		switch(keyCode) {
+			case KeyEvent.VK_UP:
+				kmPerPix += 10;
+				System.out.println("up");
+				break;
+			
+			case KeyEvent.VK_DOWN:
+				kmPerPix -= 10;
+				System.out.println("down");
+				break;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+	}
+
 	public static void main(String[] args) {
-		Main sim = new Main(4999, 4.545e9);
+		Main sim = new Main(50, 4.545e9);
 	}
 }

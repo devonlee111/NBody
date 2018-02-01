@@ -1,3 +1,6 @@
+import java.awt.Color;
+import java.util.ArrayList;
+
 public class Body {
 	
 	private final double G = 6.67408e-11; // Gravitational constant
@@ -11,6 +14,9 @@ public class Body {
 	public double density;
 	public double radius;
 	public boolean stationary;
+	public Color color;
+	public ArrayList<Point> prevPos = new ArrayList<Point>();
+	private int maxPos = 100;
 	
 	public Body(double x, double y, double xVel, double yVel, double mass, double density, boolean stationary) {
 		this.x = x;
@@ -26,10 +32,19 @@ public class Body {
 		// Radius in km
 		this.radius /= 1000;
 		this.stationary = stationary;
+		color = new Color((int)(Math.random() * 255) + 1, (int)(Math.random() * 255) + 1, (int)(Math.random() * 255) + 1);
+		prevPos.add(new Point(x, y));
 	}
 	
 	// Update the body's position and velocity with the given timestep.
 	public void update(double timestep) {
+		if (prevPos.isEmpty() || new Point(x, y).distTo(prevPos.get(0)) > 100000000) {
+			prevPos.add(0, new Point(x, y));
+			if (prevPos.size() > maxPos) {
+				prevPos.remove(maxPos);
+			}
+		}
+		
 		if (!stationary) {
 			xVel += timestep * (xForce / mass);
 			yVel += timestep * (yForce / mass);
@@ -117,5 +132,13 @@ public class Body {
 	public Point pos() {
 		Point p = new Point(x, y);
 		return p;
+	}
+	
+	public ArrayList<Point> getPrevPos() {
+		return prevPos;
+	}
+	
+	public Color getColor() {
+		return color;
 	}
 }
