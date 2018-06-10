@@ -8,21 +8,25 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 	private int numBodies;
 	private double kmPerPix;
 	private double radius;
-	private double maxBodyMass = 5.972e24;
+	private double maxBodyMass = 8.0e27;//5.972e24;
 	private double maxBodyDensity = 5.514;
 	private double minBodyDensity = .687;
 	private double solarMass = 1.989e30;
 	private double solarDensity = 1.408;
+	private double timestep = 10;
 	private ArrayList<Body> bodies;
 	ArrayList<Quadrant> quadrants = new ArrayList<Quadrant>();
 	private Quadrant all;
-	private boolean debug = true;
+	private boolean debug = false;
 	private boolean showQuadrants = false;
-	private boolean showTrails = true;
-	private int midX = 900;
-	private int midY = 500;
+	private boolean showTrails = false;
+	private boolean paused = false;
+	private int midX = 960;
+	private int midY = 540;
 	
 	public Main(int numBodies, double radius) {
+		addKeyListener(this);
+		addMouseListener(this);
 		this.numBodies = numBodies;
 		this.radius = radius;
 		bodies = new ArrayList<Body>();
@@ -31,7 +35,7 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 		
 		generateBodies();
 		
-		setSize(1800, 900);
+		setSize(1800, 1000);
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
@@ -86,7 +90,7 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 					}
 				}
 				g.setColor(Color.WHITE);
-				g.fillOval((int)((b.x / kmPerPix) - radius + midX), (int)((b.y / kmPerPix) - radius + midY), radius * 2, radius * 2);
+				g.fillOval((int)((b.x / kmPerPix) - radius * 2 + midX), (int)((b.y / kmPerPix) - radius * 2 + midY), radius * 4, radius * 4);
 
 			}
 			if (showQuadrants) {
@@ -101,9 +105,11 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 
 		public void display() {
 			// Update every body each time it is repainted.
-			calculateForces();
+			if (!paused) {
+				calculateForces();
+			}
 			if (numBodies < 4000) {
-				paintImmediately(0, 0, 1800, 900);
+				paintImmediately(0, 0, 1920, 1080);
 			}
 			else {
 				repaint();
@@ -136,11 +142,10 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 				bodies.remove(combined.get(i + 1));
 				bodies.add(combinedBody);
 				numBodies -= 1;
-				System.out.println("collision");
 			}
 		}
 		for (int i = 0; i < numBodies; i++) {
-			bodies.get(i).update(10);
+			bodies.get(i).update(timestep);
 		}
 	}
 	
@@ -151,7 +156,7 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 			double density = (Math.random() * (maxBodyDensity - minBodyDensity)) + minBodyDensity;
 			double dist = Math.sqrt(Math.random()) * radius + 1;
 			double theta = Math.random() * 360;
-			theta = 90;
+			//theta = 90;
 			double thetaV = (theta + 90) % 360;
 			theta *= (Math.PI / 180);
 			thetaV *= (Math.PI / 180);
@@ -170,13 +175,11 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		System.out.println("focus");
 		e.getComponent().requestFocus();
 	}
 	
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		System.out.println("focus");
 		e.getComponent().requestFocus();
 	}
 
@@ -204,14 +207,40 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 	public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
 		switch(keyCode) {
-			case KeyEvent.VK_UP:
-				kmPerPix += 10;
-				System.out.println("up");
+			case KeyEvent.VK_PAGE_DOWN:
+				kmPerPix += 50000;
 				break;
-			
-			case KeyEvent.VK_DOWN:
-				kmPerPix -= 10;
-				System.out.println("down");
+
+			case KeyEvent.VK_PAGE_UP:
+				kmPerPix -= 50000;
+				break;
+
+			case KeyEvent.VK_BACK_SPACE:
+				for (Body b: bodies) {
+					b.prevPos.clear();
+				}
+				break;
+
+			case KeyEvent.VK_Q:
+				showQuadrants = !showQuadrants;
+				break;
+
+			case KeyEvent.VK_T:
+				showTrails = !showTrails;
+				break;
+
+			case KeyEvent.VK_MINUS:
+				if (timestep > 2) {
+					timestep -= 1;
+				}
+				break;
+
+			case KeyEvent.VK_EQUALS:
+				timestep += 1;
+				break;
+				
+			case KeyEvent.VK_SPACE:
+				paused = !paused;
 				break;
 		}
 	}
@@ -221,6 +250,6 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 	}
 
 	public static void main(String[] args) {
-		Main sim = new Main(50, 4.545e9);
+		Main sim = new Main(500, 4.545e9);
 	}
 }
