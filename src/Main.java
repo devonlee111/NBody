@@ -21,8 +21,8 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 	private boolean showQuadrants = false;
 	private boolean showTrails = false;
 	private boolean paused = false;
-	private int midX = 960;
-	private int midY = 540;
+	private int midX = 700;
+	private int midY = 450;
 	
 	public Main(int numBodies, double radius) {
 		addKeyListener(this);
@@ -220,7 +220,23 @@ public class Main extends JFrame implements KeyListener, MouseListener {
 					b.prevPos.clear();
 				}
 				break;
-
+			
+			case KeyEvent.VK_UP:
+				midY -= 1;
+				break;
+				
+			case KeyEvent.VK_DOWN:
+				midY += 1;
+				break;
+				
+			case KeyEvent.VK_LEFT:
+				midX -= 1;
+				break;
+	
+			case KeyEvent.VK_RIGHT:
+				midX += 1;
+				break;
+				
 			case KeyEvent.VK_Q:
 				showQuadrants = !showQuadrants;
 				break;
